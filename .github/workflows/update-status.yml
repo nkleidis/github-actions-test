@@ -13,5 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: npm install
+        run: npm i @actions/core @actions/github
+
       - name: Checks the PR title
         run: node ./scripts/action.js
