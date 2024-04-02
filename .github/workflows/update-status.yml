@@ -1,5 +1,4 @@
 name: 'Update ClickUp status'
-description: 'Say "Thank You" to new pull requests'
 
 on:
   pull_request:
