@@ -12,9 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-        with:
-          node-version: '20.x'
+      - uses: actions/checkout@v4
 
       - name: npm install
         run: npm i @actions/core @actions/github
