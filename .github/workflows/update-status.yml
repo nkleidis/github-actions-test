@@ -14,4 +14,4 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Checks the PR title
-        run: node ./action
+        run: node ./scripts/action.js
