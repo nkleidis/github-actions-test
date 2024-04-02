@@ -8,8 +8,8 @@ on:
       - synchronize
 
 jobs:
+  using: 'node20'
   main:
-    using: 'node20'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
