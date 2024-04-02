@@ -1,4 +1,4 @@
-name: 'Thank You Action'
+name: 'Update ClickUp status'
 description: 'Say "Thank You" to new pull requests'
 
 on:
@@ -15,4 +15,4 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Checks the PR title
-        run: node ./src/action
+        run: node ./action
