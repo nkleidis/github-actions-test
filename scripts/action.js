@@ -6,7 +6,7 @@ function getTitle() {
 }
 
 async function run() {
-  core.debug(getTitle());
+  core.debug(`PR title:: ${getTitle()}`);
 }
 
 run().catch(e => core.setFailed(e));
