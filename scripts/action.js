@@ -6,6 +6,7 @@ function getTitle() {
 }
 
 async function run() {
+  console.log("Retrieving PR title...")
   core.debug(`PR title:: ${getTitle()}`);
 }
 
