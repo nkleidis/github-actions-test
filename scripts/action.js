@@ -6,7 +6,7 @@ function getTitle() {
 }
 
 async function run() {
-  console.log(getTitle());
+  core.debug(getTitle());
 }
 
 run().catch(e => core.setFailed(e));
