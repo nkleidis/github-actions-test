@@ -5,6 +5,7 @@ on:
     types:
       - opened
       - edited
+      - closed
       - synchronize
       - ready_for_review
 
