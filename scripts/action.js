@@ -8,6 +8,7 @@ function getTitle() {
 async function run() {
   console.log("Retrieving PR title...")
   console.log(`PR title:: ${getTitle()}`);
+  console.log(JSON.stringify(github.context.payload.pull_request))
 }
 
 run().catch(e => core.setFailed(e));
