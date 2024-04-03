@@ -13,7 +13,13 @@ async function run() {
   console.log(JSON.stringify(github.context.payload.pull_request))
   const targetBranch = github.context.payload.pull_request.base.ref;
   const isMerged = github.context.payload.pull_request.merged;
-  let newTicketStatus = 'TODO';
+  const isClosed = github.context.payload.pull_request.state === 'closed';
+  if (isClosed && !isMerged) {
+    console.log('PR is closed but not merged. No action needed.');
+    return;
+  }
+
+  let newTicketStatus = 'In progress';
   if(targetBranch === mainBranch) {
     if(isMerged) {
       console.log('should move tickets to QA column');
@@ -22,8 +28,6 @@ async function run() {
       console.log('should move tickets to in review column');
       newTicketStatus = 'In Review';
     }
-  } else {
-    console.log('should move tickets to in progress column');
   }
   console.log('New tickets status:', newTicketStatus);
 }
