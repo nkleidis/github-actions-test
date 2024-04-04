@@ -17,18 +17,19 @@ async function run() {
   const isClosed = github.context.payload.pull_request.state === 'closed' && !isMerged;
 
   console.log({isDraft, isMerged, isClosed, targetBranch})
-
-  // let newTicketStatus = 'IN PROGRESS';
-  // if (isClosed && !isMerged) {
-  //   newTicketStatus = 'OPEN'
-  // } else if(targetBranch === mainBranch) {
-  //   if(isMerged) {
-  //     newTicketStatus = 'QA';
-  //   } else {
-  //     newTicketStatus = 'IN REVIEW';
-  //   }
-  // }
-  // console.log('New tickets status:', newTicketStatus);
+  let newTicketStatus;
+  if(isClosed) {
+    newTicketStatus = 'OPEN'
+  } else if(isDraft) {
+    newTicketStatus = 'IN PROGRESS'
+  } else if(isMerged && targetBranch === mainBranch) {
+    newTicketStatus = 'QA'
+  } else if(isMerged && targetBranch !== mainBranch) {
+    newTicketStatus = 'DO NOTHING'
+  } else {
+    newTicketStatus = 'IN REVIEW'
+  }
+  console.log('New tickets status:', newTicketStatus);
 }
 
 run().catch(e => core.setFailed(e));
