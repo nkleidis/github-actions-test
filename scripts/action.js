@@ -28,7 +28,7 @@ async function run() {
   //     newTicketStatus = 'IN REVIEW';
   //   }
   // }
-  console.log('New tickets status:', newTicketStatus);
+  // console.log('New tickets status:', newTicketStatus);
 }
 
 run().catch(e => core.setFailed(e));
