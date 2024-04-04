@@ -13,7 +13,7 @@ async function run() {
   console.log(JSON.stringify(github.context.payload.pull_request))
   const targetBranch = github.context.payload.pull_request.base.ref;
   const isDraft = github.context.payload.pull_request.draft;
-  const isMerged = github.context.payload.pull_request.merged && github.context.payload.pull_request.state !== 'closed';
+  const isMerged = github.context.payload.pull_request.merged;
   const isClosed = github.context.payload.pull_request.state === 'closed' && !isMerged;
 
   console.log({isDraft, isMerged, isClosed, targetBranch})
