@@ -12,19 +12,22 @@ async function run() {
   console.log(`PR title:: ${getTitle()}`);
   console.log(JSON.stringify(github.context.payload.pull_request))
   const targetBranch = github.context.payload.pull_request.base.ref;
-  const isMerged = github.context.payload.pull_request.merged;
-  const isClosed = github.context.payload.pull_request.state === 'closed';
+  const isDraft = github.context.payload.pull_request.draft;
+  const isMerged = github.context.payload.pull_request.merged && github.context.payload.pull_request.state !== 'closed';
+  const isClosed = github.context.payload.pull_request.state === 'closed' && !isMerged;
 
-  let newTicketStatus = 'IN PROGRESS';
-  if (isClosed && !isMerged) {
-    newTicketStatus = 'OPEN'
-  } else if(targetBranch === mainBranch) {
-    if(isMerged) {
-      newTicketStatus = 'QA';
-    } else {
-      newTicketStatus = 'IN REVIEW';
-    }
-  }
+  console.log({isDraft, isMerged, isClosed, targetBranch})
+
+  // let newTicketStatus = 'IN PROGRESS';
+  // if (isClosed && !isMerged) {
+  //   newTicketStatus = 'OPEN'
+  // } else if(targetBranch === mainBranch) {
+  //   if(isMerged) {
+  //     newTicketStatus = 'QA';
+  //   } else {
+  //     newTicketStatus = 'IN REVIEW';
+  //   }
+  // }
   console.log('New tickets status:', newTicketStatus);
 }
 
