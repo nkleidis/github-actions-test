@@ -12,20 +12,34 @@ async function run() {
   console.log(`PR title:: ${getTitle()}`);
   console.log(JSON.stringify(github.context.payload.pull_request))
   const targetBranch = github.context.payload.pull_request.base.ref;
-  const isMerged = github.context.payload.pull_request.merged;
-  let newTicketStatus = 'TODO';
-  if(targetBranch === mainBranch) {
-    if(isMerged) {
-      console.log('should move tickets to QA column');
-      newTicketStatus = 'QA';
-    } else {
-      console.log('should move tickets to in review column');
-      newTicketStatus = 'In Review';
-    }
+  const isDraft = github.context.payload.pull_request.draft;
+  const isMerged = github.context.payload.pull_request.merged && github.context.payload.pull_request.state !== 'closed';
+  const isClosed = github.context.payload.pull_request.state === 'closed' && !isMerged;
+
+  console.log({isDraft, isMerged, isClosed, targetBranch})
+  let newTicketStatus;
+  if(isClosed) {
+    newTicketStatus = 'OPEN'
+  } else if(isDraft) {
+    newTicketStatus = 'IN PROGRESS'
+  } else if(isMerged && targetBranch === mainBranch) {
+    newTicketStatus = 'QA'
+  } else if(isMerged && targetBranch !== mainBranch) {
+    newTicketStatus = 'DO NOTHING'
   } else {
-    console.log('should move tickets to in progress column');
+    newTicketStatus = 'IN REVIEW'
   }
   console.log('New tickets status:', newTicketStatus);
 }
 
 run().catch(e => core.setFailed(e));
+
+/*
+    Action  | Target  | New Status
+    -------------------------------
+    Open    | any     | IN REVIEW
+    merged  | master  | QA
+    merged  | other   | Do nothing
+    closed  | any     | OPEN
+    draft   | any     | IN PROGRESS
+ */
