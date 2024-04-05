@@ -20,4 +20,6 @@ jobs:
         run: npm i @actions/core @actions/github
 
       - name: Checks the PR title
+        env:
+          API_KEY: ${{ secrets.CLICKUP_API_KEY }}
         run: node ./scripts/action.js

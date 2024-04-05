@@ -3,43 +3,48 @@ const core = require('@actions/core');
 
 const mainBranch = 'main';
 
-function getTitle() {
-  return github.context.payload.pull_request.title;
-}
+/*
+  Action Plan:
+    Action  | Target Branch   | New Status
+    -------------------------------
+    Open    | any             | IN REVIEW
+    merged  | master          | QA
+    merged  | other           | Do nothing
+    closed  | any             | OPEN
+    draft   | any             | IN PROGRESS
 
-async function run() {
-  console.log("Retrieving PR title...")
-  console.log(`PR title:: ${getTitle()}`);
-  console.log(JSON.stringify(github.context.payload.pull_request))
-  const targetBranch = github.context.payload.pull_request.base.ref;
-  const isDraft = github.context.payload.pull_request.draft;
-  const isMerged = github.context.payload.pull_request.merged;
-  const isClosed = github.context.payload.pull_request.state === 'closed' && !isMerged;
+    Available Statuses in MOB team:
+    'open', 'in progress', 'investigating', 'in review', 'qa', 'cancelled', 'completed'
+ */
+async function handlePullRequestAction() {
+  const pullRequestData = github.context.payload.pull_request;
+  console.log(JSON.stringify(pullRequestData))
+  console.log("key:", process.env.CLICKUP_API_KEY)
+  const targetBranch = pullRequestData.base.ref;
+  const isDraft = pullRequestData.draft;
+  const isMerged = pullRequestData.merged;
+  const isClosed = pullRequestData.state === 'closed' && !isMerged;
 
   console.log({isDraft, isMerged, isClosed, targetBranch})
+  if (isMerged && targetBranch !== mainBranch) {
+    console.log('PR is merged but not to main branch. No action needed.');
+    return;
+  }
   let newTicketStatus;
   if(isClosed) {
-    newTicketStatus = 'OPEN'
+    newTicketStatus = 'open'
   } else if(isDraft) {
-    newTicketStatus = 'IN PROGRESS'
+    newTicketStatus = 'in progress'
   } else if(isMerged && targetBranch === mainBranch) {
-    newTicketStatus = 'QA'
-  } else if(isMerged && targetBranch !== mainBranch) {
-    newTicketStatus = 'DO NOTHING'
+    newTicketStatus = 'qa'
   } else {
-    newTicketStatus = 'IN REVIEW'
+    newTicketStatus = 'in review'
   }
   console.log('New tickets status:', newTicketStatus);
+  const title = pullRequestData.title
+
+  console.log("Retrieving PR title...")
+  console.log(`PR title:: ${title}`);
 }
 
-run().catch(e => core.setFailed(e));
-
-/*
-    Action  | Target  | New Status
-    -------------------------------
-    Open    | any     | IN REVIEW
-    merged  | master  | QA
-    merged  | other   | Do nothing
-    closed  | any     | OPEN
-    draft   | any     | IN PROGRESS
- */
+handlePullRequestAction().catch(e => core.setFailed(e));
