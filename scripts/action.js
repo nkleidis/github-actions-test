@@ -75,7 +75,9 @@ async function setStatusToTask({taskId, status}) {
   const data = await response.json();
   if (!response.ok) {
     console.log(`Failed to update task: ${taskId}`, data);
+    return;
   }
+
   console.log(`Task ${taskId} updated to ${status}`);
 }
 

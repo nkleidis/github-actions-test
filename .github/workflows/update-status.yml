@@ -22,4 +22,4 @@ jobs:
       - name: Checks the PR title
         run: node ./scripts/action.js
         env:
-          API_KEY: ${{ secrets.CLICKUP_API_KEY }}
+          CLICKUP_API_KEY: ${{ secrets.CLICKUP_API_KEY }}
