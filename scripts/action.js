@@ -1,9 +1,10 @@
 const github = require('@actions/github');
 const core = require('@actions/core');
 
-const mainBranch = 'main';
+const MAIN_BRANCH = 'main';
 const SPACE_PREFIX = "MOB";
 const TEAM_ID= '9015210430'
+const API_KEY = process.env.CLICKUP_API_KEY
 
 /*
   Action Plan:
@@ -20,24 +21,24 @@ const TEAM_ID= '9015210430'
  */
 async function handlePullRequestAction() {
   const pullRequestData = github.context.payload.pull_request;
-  console.log(JSON.stringify(pullRequestData))
-  console.log("key:", process.env.CLICKUP_API_KEY)
+
   const targetBranch = pullRequestData.base.ref;
   const isDraft = pullRequestData.draft;
   const isMerged = pullRequestData.merged;
   const isClosed = pullRequestData.state === 'closed' && !isMerged;
 
   console.log({isDraft, isMerged, isClosed, targetBranch})
-  if (isMerged && targetBranch !== mainBranch) {
+  if (isMerged && targetBranch !== MAIN_BRANCH) {
     console.log('PR is merged but not to main branch. No action needed.');
     return;
   }
+
   let newTaskStatus;
   if(isClosed) {
     newTaskStatus = 'open'
   } else if(isDraft) {
     newTaskStatus = 'in progress'
-  } else if(isMerged && targetBranch === mainBranch) {
+  } else if(isMerged && targetBranch === MAIN_BRANCH) {
     newTaskStatus = 'qa'
   } else {
     newTaskStatus = 'in review'
@@ -45,13 +46,12 @@ async function handlePullRequestAction() {
   console.log('New tickets status:', newTaskStatus);
   const title = pullRequestData.title
 
-  console.log("Retrieving PR title...")
-  console.log(`PR title:: ${title}`);
-  const tasks = getTaskIds(title);
-  const promises = tasks.map(taskId =>
+  const taskIds = getTaskIds(title);
+  const promises = taskIds.map(taskId =>
     setStatusToTask({ taskId, status: newTaskStatus})
   );
   await Promise.all(promises);
+  console.log('All tasks updated successfully!');
 }
 
 async function setStatusToTask({taskId, status}) {
@@ -66,7 +66,7 @@ async function setStatusToTask({taskId, status}) {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: process.env.CLICKUP_API_KEY
+        Authorization: API_KEY
       },
       body: JSON.stringify({ status })
     }
@@ -82,7 +82,7 @@ async function setStatusToTask({taskId, status}) {
 }
 
 /**
- * Extracts task IDs from a commit message
+ * Extracts task IDs from a given string
  *
  * @param title the PR title
  * @returns {Array<string>}

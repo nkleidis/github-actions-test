@@ -19,7 +19,7 @@ jobs:
       - name: npm install
         run: npm i @actions/core @actions/github
 
-      - name: Checks the PR title
+      - name: Update ClickUp status
         run: node ./scripts/action.js
         env:
           CLICKUP_API_KEY: ${{ secrets.CLICKUP_API_KEY }}
