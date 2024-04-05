@@ -3,6 +3,7 @@ const core = require('@actions/core');
 
 const mainBranch = 'main';
 const SPACE_PREFIX = "MOB";
+const TEAM_ID= '9015210430'
 
 /*
   Action Plan:
@@ -31,34 +32,63 @@ async function handlePullRequestAction() {
     console.log('PR is merged but not to main branch. No action needed.');
     return;
   }
-  let newTicketStatus;
+  let newTaskStatus;
   if(isClosed) {
-    newTicketStatus = 'open'
+    newTaskStatus = 'open'
   } else if(isDraft) {
-    newTicketStatus = 'in progress'
+    newTaskStatus = 'in progress'
   } else if(isMerged && targetBranch === mainBranch) {
-    newTicketStatus = 'qa'
+    newTaskStatus = 'qa'
   } else {
-    newTicketStatus = 'in review'
+    newTaskStatus = 'in review'
   }
-  console.log('New tickets status:', newTicketStatus);
+  console.log('New tickets status:', newTaskStatus);
   const title = pullRequestData.title
 
   console.log("Retrieving PR title...")
   console.log(`PR title:: ${title}`);
-  console.log("ticketsFound:", getTicketIds(title));
+  const tasks = getTaskIds(title);
+  const promises = tasks.map(taskId =>
+    setStatusToTask({ taskId, status: newTaskStatus})
+  );
+  await Promise.all(promises);
+}
+
+async function setStatusToTask({taskId, status}) {
+  const query = new URLSearchParams({
+    custom_task_ids: 'true',
+    team_id: TEAM_ID
+  }).toString();
+
+  const response = await fetch(
+    `https://api.clickup.com/api/v2/task/${taskId}?${query}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: process.env.CLICKUP_API_KEY
+      },
+      body: JSON.stringify({ status })
+    }
+  );
+
+  const data = await response.json();
+  if (!response.ok) {
+    console.log(`Failed to update task: ${taskId}`, data);
+  }
+  console.log(`Task ${taskId} updated to ${status}`);
 }
 
 /**
- * Extracts ticket IDs from a commit message
+ * Extracts task IDs from a commit message
  *
- * @param message the commit message
- * @returns {Set<string>}
+ * @param title the PR title
+ * @returns {Array<string>}
  */
-function getTicketIds(message) {
+function getTaskIds(title) {
   const regex = new RegExp(`${SPACE_PREFIX}-(\\d+)`, 'g');
-  const matches = message.match(regex);
-  return matches ? new Set(matches) : new Set(); // Use Set for unique elements
+  const matches = title.match(regex);
+  return matches ? [...new Set(matches)] : []; // Use Set for unique elements
 }
 
 handlePullRequestAction().catch(e => core.setFailed(e));
