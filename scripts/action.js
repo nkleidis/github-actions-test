@@ -2,6 +2,7 @@ const github = require('@actions/github');
 const core = require('@actions/core');
 
 const mainBranch = 'main';
+const SPACE_PREFIX = "MOB";
 
 /*
   Action Plan:
@@ -45,6 +46,19 @@ async function handlePullRequestAction() {
 
   console.log("Retrieving PR title...")
   console.log(`PR title:: ${title}`);
+  console.log("ticketsFound:", getTicketIds(title));
+}
+
+/**
+ * Extracts ticket IDs from a commit message
+ *
+ * @param message the commit message
+ * @returns {Set<string>}
+ */
+function getTicketIds(message) {
+  const regex = new RegExp(`${SPACE_PREFIX}-(\\d+)`, 'g');
+  const matches = message.match(regex);
+  return matches ? new Set(matches) : new Set(); // Use Set for unique elements
 }
 
 handlePullRequestAction().catch(e => core.setFailed(e));
