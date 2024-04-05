@@ -47,6 +47,10 @@ async function handlePullRequestAction() {
   const title = pullRequestData.title
 
   const taskIds = getTaskIds(title);
+  if (taskIds.length === 0) {
+    console.log('No task IDs found in the PR title.');
+    return;
+  }
   const promises = taskIds.map(taskId =>
     setStatusToTask({ taskId, status: newTaskStatus})
   );
